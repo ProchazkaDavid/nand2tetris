@@ -12,8 +12,8 @@ Solutions for [From Nand to Tetris - Part I](https://www.coursera.org/learn/buil
 - [Boolean Arithmetic and the ALU](./02-alu)
 - [Memory](./03-memory)
 - [Machine Language](./04-machine-language)
-- [Computer Architecture](05-computer-architecture)
-- Assembler
+- [Computer Architecture](./05-computer-architecture)
+- [Assembler](./06-assembler)
 
 ### Part II
 
