@@ -1,107 +1,63 @@
 package code
 
 // Dest returns the binary code of the dest mnemonic.
-func Dest(mnemonic string) string {
-	switch mnemonic {
-	case "":
-		return "000"
-	case "M":
-		return "001"
-	case "D":
-		return "010"
-	case "MD":
-		return "011"
-	case "A":
-		return "100"
-	case "AM":
-		return "101"
-	case "AD":
-		return "110"
-	default:
-		return "111"
-	}
-}
+func Dest(mnemonic string) string { return dest[mnemonic] }
 
 // Comp returns the binary code of the comp mnemonic.
-func Comp(mnemonic string) string {
-	switch mnemonic {
-	case "0":
-		return "0101010"
-	case "1":
-		return "0111111"
-	case "-1":
-		return "0111010"
-	case "D":
-		return "0001100"
-	case "A":
-		return "0110000"
-	case "!D":
-		return "0001101"
-	case "!A":
-		return "0110001"
-	case "-D":
-		return "0001111"
-	case "-A":
-		return "0110011"
-	case "D+1":
-		return "0011111"
-	case "A+1":
-		return "0110111"
-	case "D-1":
-		return "0001110"
-	case "A-1":
-		return "0110010"
-	case "D+A":
-		return "0000010"
-	case "D-A":
-		return "0010011"
-	case "A-D":
-		return "0000111"
-	case "D&A":
-		return "0000000"
-	case "D|A":
-		return "0010101"
-	case "M":
-		return "1110000"
-	case "!M":
-		return "1110001"
-	case "-M":
-		return "1110011"
-	case "M+1":
-		return "1110111"
-	case "M-1":
-		return "1110010"
-	case "D+M":
-		return "1000010"
-	case "D-M":
-		return "1010011"
-	case "M-D":
-		return "1000111"
-	case "D&M":
-		return "1000000"
-	default:
-		return "1010101"
-	}
-}
+func Comp(mnemonic string) string { return comp[mnemonic] }
 
 // Jump returns the binary code of the jump mnemonic.
-func Jump(mnemonic string) string {
-	switch mnemonic {
-	case "":
-		return "000"
-	case "JGT":
-		return "001"
-	case "JEQ":
-		return "010"
-	case "JGE":
-		return "011"
-	case "JLT":
-		return "100"
-	case "JNE":
-		return "101"
-	case "JLE":
-		return "110"
-	default:
-		return "111"
-	}
+func Jump(mnemonic string) string { return jump[mnemonic] }
+
+var dest = map[string]string{
+	"":    "000",
+	"M":   "001",
+	"D":   "010",
+	"MD":  "011",
+	"A":   "100",
+	"AM":  "101",
+	"AD":  "110",
+	"AMD": "111",
+}
+
+var comp = map[string]string{
+	"0":   "0101010",
+	"1":   "0111111",
+	"-1":  "0111010",
+	"D":   "0001100",
+	"A":   "0110000",
+	"!D":  "0001101",
+	"!A":  "0110001",
+	"-D":  "0001111",
+	"-A":  "0110011",
+	"D+1": "0011111",
+	"A+1": "0110111",
+	"D-1": "0001110",
+	"A-1": "0110010",
+	"D+A": "0000010",
+	"D-A": "0010011",
+	"A-D": "0000111",
+	"D&A": "0000000",
+	"D|A": "0010101",
+	"M":   "1110000",
+	"!M":  "1110001",
+	"-M":  "1110011",
+	"M+1": "1110111",
+	"M-1": "1110010",
+	"D+M": "1000010",
+	"D-M": "1010011",
+	"M-D": "1000111",
+	"D&M": "1000000",
+	"D|M": "1010101",
+}
+
+var jump = map[string]string{
+	"":    "000",
+	"JGT": "001",
+	"JEQ": "010",
+	"JGE": "011",
+	"JLT": "100",
+	"JNE": "101",
+	"JLE": "110",
+	"JMP": "111",
 }
