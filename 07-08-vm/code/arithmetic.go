@@ -2,6 +2,20 @@ package code
 
 import "fmt"
 
+// WriteArithmetic writes to the output file the assembly code that implements the given arithmetic command.
+func (cw *Writer) WriteArithmetic(operation string) error {
+	switch operation {
+	case "add", "sub", "and", "or":
+		return cw.write(binaryOperation(operation))
+	case "lt", "gt":
+		return cw.write(compare(operation))
+	case "neg", "not":
+		return cw.write(unaryOperation(operation))
+	default:
+		return cw.write(eqInstructions())
+	}
+}
+
 // instruction maps .vm arithmetic operation to the corresponding .asm operation
 var instruction = map[string]string{
 	"add": "+",
@@ -14,14 +28,10 @@ var instruction = map[string]string{
 	"not": "!",
 }
 
-// counters for keeping the compare and eq operations unique across the .vm file
-var eqCounter = 0
-var compareCounter = 0
-
 // Generates instructions for neg, not
 func unaryOperation(operation string) []string {
 	return []string{
-		fmt.Sprintf("// %sx", instruction[operation]),
+		fmt.Sprintf("// %s", operation),
 		"@SP",
 		"A=M-1",
 		fmt.Sprintf("M=%sM", instruction[operation]),
@@ -31,7 +41,7 @@ func unaryOperation(operation string) []string {
 // Generates instructions for add, sub, and, or
 func binaryOperation(operation string) []string {
 	return []string{
-		fmt.Sprintf("// x %s y", instruction[operation]),
+		fmt.Sprintf("// %s", operation),
 		"@SP",
 		"M=M-1",
 		"A=M",
@@ -41,11 +51,15 @@ func binaryOperation(operation string) []string {
 	}
 }
 
+// counters for keeping the eq and compare operations unique across the .asm file
+var eqCounter = 0
+var compareCounter = 0
+
 // Generates instructions for eq
 func eqInstructions() []string {
 	eqCounter++
 	return []string{
-		"// x == y",
+		"// eq",
 		"@SP",
 		"M=M-1",
 		"A=M",
@@ -66,7 +80,7 @@ func eqInstructions() []string {
 func compare(operation string) []string {
 	compareCounter++
 	return []string{
-		fmt.Sprintf("// x %s y", instruction[operation]),
+		fmt.Sprintf("// %s", operation),
 		"@SP",
 		"M=M-1",
 		"A=M",

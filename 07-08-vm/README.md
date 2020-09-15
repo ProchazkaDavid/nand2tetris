@@ -9,7 +9,7 @@ make build
 ## Usage
 
 ```shell
-./VMTranslator ./examples/PointerTest.vm
+./VMTranslator ./examples/FibonacciElement
 ```
 
-After running the command above, the `PointerTest.asm` file is generated in the `./examples` folder.
+After running the command above, the `FibonacciElement.asm` file is generated in the `./examples/FibonacciElement` folder.

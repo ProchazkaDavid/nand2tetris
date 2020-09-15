@@ -2,6 +2,36 @@ package code
 
 import "fmt"
 
+// WritePush writes to the output file the assembly code that implements Push/Pop command.
+func (cw *Writer) WritePush(segment string, index int) error {
+	switch segment {
+	case "constant":
+		return cw.write(constant(index))
+	case "static":
+		return cw.write(pushStatic(index, cw.filename))
+	case "temp":
+		return cw.write(pushTemp(index))
+	case "pointer":
+		return cw.write(pushPointer(index))
+	default:
+		return cw.write(push(segment, index))
+	}
+}
+
+// WritePop writes to the output file the assembly code that implements Push/Pop command.
+func (cw *Writer) WritePop(segment string, index int) error {
+	switch segment {
+	case "static":
+		return cw.write(popStatic(index, cw.filename))
+	case "temp":
+		return cw.write(popTemp(index))
+	case "pointer":
+		return cw.write(popPointer(index))
+	default:
+		return cw.write(pop(segment, index))
+	}
+}
+
 // segments maps .vm segment to the .asm address
 var segments = map[string]string{
 	"local":    "LCL",

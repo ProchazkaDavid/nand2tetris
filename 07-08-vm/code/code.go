@@ -2,65 +2,51 @@ package code
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
 // Writer represents the
 type Writer struct {
-	file *os.File
+	file     *os.File
+	filename string
 }
 
 // New opens the output file and gets ready to write into it.
-func New(path string) (*Writer, error) {
-	file, err := os.Create(strings.TrimSuffix(path, filepath.Ext(path)) + ".asm")
-	return &Writer{file}, err
-}
-
-// WriteArithmetic writes to the output file the assembly code that implements the given arithmetic command.
-func (cw *Writer) WriteArithmetic(operation string) error {
-	switch operation {
-	case "add", "sub", "and", "or":
-		return cw.write(binaryOperation(operation))
-	case "lt", "gt":
-		return cw.write(compare(operation))
-	case "neg", "not":
-		return cw.write(unaryOperation(operation))
-	default:
-		return cw.write(eqInstructions())
+func New(fPath string) (*Writer, error) {
+	file, err := os.Create(fPath)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Writer{
+		file:     file,
+		filename: strings.TrimSuffix(path.Base(fPath), filepath.Ext(fPath)),
+	}, err
 }
 
-// WritePush writes to the output file the assembly code that implements Push/Pop command.
-func (cw *Writer) WritePush(segment string, index int, filename string) error {
-	switch segment {
-	case "constant":
-		return cw.write(constant(index))
-	case "static":
-		return cw.write(pushStatic(index, filename))
-	case "temp":
-		return cw.write(pushTemp(index))
-	case "pointer":
-		return cw.write(pushPointer(index))
-	default:
-		return cw.write(push(segment, index))
+// SetFilename sets a new filename
+func (cw *Writer) SetFilename(filename string) {
+	cw.filename = strings.TrimSuffix(path.Base(filename), filepath.Ext(filename))
+}
+
+// WriteInit writes bootstrap code to the output file
+func (cw *Writer) WriteInit() error {
+	if err := cw.write([]string{
+		"// Bootstrap code",
+		"@256",
+		"D=A",
+		"@SP",
+		"M=D",
+	}); err != nil {
+		return err
 	}
+
+	return cw.WriteCall("Sys.init", 0)
 }
 
-// WritePop writes to the output file the assembly code that implements Push/Pop command.
-func (cw *Writer) WritePop(segment string, index int, filename string) error {
-	switch segment {
-	case "static":
-		return cw.write(popStatic(index, filename))
-	case "temp":
-		return cw.write(popTemp(index))
-	case "pointer":
-		return cw.write(popPointer(index))
-	default:
-		return cw.write(pop(segment, index))
-	}
-}
-
+// write writes instructions to the file
 func (cw *Writer) write(instructions []string) error {
 	var builder strings.Builder
 	for _, inst := range instructions {

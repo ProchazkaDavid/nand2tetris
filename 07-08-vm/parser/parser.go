@@ -19,7 +19,11 @@ type Parser struct {
 // New opens the input file and gets ready to parse it.
 func New(path string) (*Parser, error) {
 	f, err := os.Open(path)
-	return &Parser{bufio.NewScanner(f), []string{}}, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &Parser{bufio.NewScanner(f), []string{}}, nil
 }
 
 // HasMoreCommands returns true if there are more commands in the input.
@@ -36,6 +40,14 @@ func (p *Parser) Advance() {
 	}
 
 	p.command = strings.Fields(command)
+
+	// Remove comments after the command
+	for i, field := range p.command {
+		if field == "//" {
+			p.command = p.command[:i]
+			return
+		}
+	}
 }
 
 // ignoreCommand defines which types of commands to ignore
@@ -45,15 +57,26 @@ func ignoreCommand(command string) bool {
 
 // CommandType return one of defined command type constants
 func (p *Parser) CommandType() command.Type {
-	if len(p.command) == 1 {
+	switch p.command[0] {
+	case "push":
+		return command.Push
+	case "pop":
+		return command.Pop
+	case "label":
+		return command.Label
+	case "goto":
+		return command.Goto
+	case "if-goto":
+		return command.If
+	case "function":
+		return command.Function
+	case "call":
+		return command.Call
+	case "return":
+		return command.Return
+	default:
 		return command.Arithmetic
 	}
-
-	// Push or Pop
-	if p.command[0] == "push" {
-		return command.Push
-	}
-	return command.Pop
 }
 
 // Arg1 returns the first argument of the current command.

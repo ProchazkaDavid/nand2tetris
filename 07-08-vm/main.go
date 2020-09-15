@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -17,51 +16,84 @@ func main() {
 		log.Fatalln("expected one argument")
 	}
 
-	fPath := os.Args[1]
+	path := os.Args[1]
 
-	// Create a parser
-	p, err := parser.New(fPath)
+	info, err := os.Stat(path)
 	if err != nil {
-		log.Fatalln("couldn't setup the parser:", err)
+		log.Fatalf("couldn't get info about the input: %v", err)
 	}
 
-	// Prepare .asm file
-	writer, err := code.New(fPath)
-	if err != nil {
-		log.Fatalln("couldn't setup the code writer:", err)
+	// Setup output file and files for parser
+	output := strings.TrimSuffix(path, filepath.Ext(path)) + ".asm"
+	files := []string{path}
+
+	if info.IsDir() {
+		files, err = filepath.Glob(filepath.Join(path, "*.vm"))
+		if err != nil {
+			log.Fatalf("couldn't get input files: %v", err)
+		}
+
+		output = filepath.Join(path, filepath.Base(path)+".asm")
 	}
 
-	// Handle errors and closing of the .asm file
-	defer func() {
-		if err != nil {
-			log.Println(err)
+	writer, err := code.New(output)
+	if err != nil {
+		log.Fatalf("couldn't setup the code writer: %v", err)
+	}
+
+	if info.IsDir() {
+		if err := writer.WriteInit(); err != nil {
+			log.Fatalf("couldn't write the bootstrap code: %v", err)
 		}
+	}
 
-		if closeError := writer.Close(); closeError != nil {
-			log.Fatalf("couldn't save the .asm file: %v", closeError)
+	for _, file := range files {
+		writer.SetFilename(file)
+		if err := parse(file, writer); err != nil {
+			log.Fatalf("couldn't parse %s: %v", file, err)
 		}
+	}
 
-		if err != nil {
-			os.Exit(1)
-		}
-	}()
+	if err := writer.Close(); err != nil {
+		log.Fatalf("couldn't save the .asm file: %v", err)
+	}
+}
 
-	filename := strings.TrimSuffix(path.Base(fPath), filepath.Ext(fPath))
+func parse(file string, writer *code.Writer) error {
+	p, err := parser.New(file)
+	if err != nil {
+		return err
+	}
 
+	currentFunction := ""
 	for p.HasMoreCommands() {
 		p.Advance()
 
 		switch p.CommandType() {
 		case command.Push:
-			err = writer.WritePush(p.Arg1(), p.Arg2(), filename)
+			err = writer.WritePush(p.Arg1(), p.Arg2())
 		case command.Pop:
-			err = writer.WritePop(p.Arg1(), p.Arg2(), filename)
+			err = writer.WritePop(p.Arg1(), p.Arg2())
+		case command.Label:
+			err = writer.WriteLabel(p.Arg1(), currentFunction)
+		case command.Goto:
+			err = writer.WriteGoto(p.Arg1(), currentFunction)
+		case command.If:
+			err = writer.WriteIf(p.Arg1(), currentFunction)
+		case command.Function:
+			err = writer.WriteFunction(p.Arg1(), p.Arg2())
+			currentFunction = p.Arg1()
+		case command.Call:
+			err = writer.WriteCall(p.Arg1(), p.Arg2())
+		case command.Return:
+			err = writer.WriteReturn()
 		default:
 			err = writer.WriteArithmetic(p.Arg1())
 		}
 
 		if err != nil {
-			return
+			return err
 		}
 	}
+	return nil
 }
