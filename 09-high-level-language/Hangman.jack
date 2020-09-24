@@ -1,0 +1,105 @@
+class Hangman {
+    field String word;
+    field String letters;
+    field int turns;
+
+    /** Constructs a new hangman game with a given word and number of turns. */
+    constructor Hangman new(String w, int t) {
+        let word = w;
+        let turns = t;
+
+        if (turns < 0) { 
+            let turns = 5;
+        }
+        if (word.length() = 0) {
+            let word = "APPLE";
+        }
+
+        let letters = String.new(t);
+        
+        return this;
+    }
+
+   /** Makes on guess. */
+    method void guess(char letter) {
+        let letters = letters.appendChar(letter);
+        let turns = turns - 1;
+        return;
+    }
+
+    /** Returns if the letter was previously entered. */
+    method boolean letterFound(char letter) {
+        var boolean seenLetter;
+        var int j;
+
+        let seenLetter = false;
+        let j = 0;
+
+        // Check if the letter is in the letters.
+        while (j < letters.length()) {
+            if (letters.charAt(j) = letter) {
+                let seenLetter = true;
+            }
+            let j = j + 1;
+        }
+
+        return seenLetter;
+    }
+
+    /** Returns if the game has ended. */
+    method boolean end() {
+        return turns = 0 | turns < 0;
+    }
+
+    /** Returns if the player won the game. */
+    method boolean won() {
+        var boolean found;
+        var int i;
+
+        let i = 0;
+
+        // Checks if there exists a letter that wasn't previsouly guessed.
+        while (i < word.length()) {
+            let found = letterFound(word.charAt(i));
+            if (~found) {
+                return false;
+            }
+
+            let i = i + 1;
+        }
+
+        return true;
+    }
+
+    /** Prints the status of the game. */
+    method void print() {
+        var boolean found;
+        var int i;
+        
+        let i = 0;
+
+        do Screen.clearScreen();
+        do Output.moveCursor(0, 0);
+        
+        // For every character in word check if the letter was previously entered
+        // and print the corresponding character.
+        while (i < word.length()) {
+            let found = letterFound(word.charAt(i));
+            if (found) {
+                do Output.printChar(word.charAt(i));
+            } else {
+                do Output.printChar(95);
+            }
+
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+   /** Disposes the game. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

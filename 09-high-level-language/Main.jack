@@ -1,0 +1,43 @@
+class Main {
+    function void main() {
+        var Hangman game;
+        var boolean won;
+        var char letter;
+        var String word;
+
+        let word = "KEYBOARD";
+        let game = Hangman.new(word, 15);
+
+        do game.print();
+
+        while (~game.end()) {
+            do Output.println();
+            
+            do Output.printString("Enter a letter: ");
+            let letter = Keyboard.readChar();
+            do game.guess(letter);
+
+            let won = game.won();
+            if (won) {
+                do game.print();
+                do Output.println();
+                do Output.println();
+                do Output.printString("Congratulations, You won!");
+
+                do game.dispose();
+                return;
+            }
+
+            do game.print();
+        }
+
+        do Output.println();
+        do Output.println();
+        do Output.printString("You lost! The word was ");
+        do Output.printString(word);
+        
+        do game.dispose();
+        do word.dispose();
+        return;
+    }
+}

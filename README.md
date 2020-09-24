@@ -19,7 +19,7 @@ Solutions for [From Nand to Tetris - Part I](https://www.coursera.org/learn/buil
 
 - [Virtual Machine I: Stack Arithmetic](./07-08-vm)
 - [Virtual Machine II: Program Control](./07-08-vm)
-- High-Level Language
+- [High-Level Language](./09-high-level-language)
 - Compiler I: Syntax Analysis
 - Compiler II: Code Generation
 - Operating System
